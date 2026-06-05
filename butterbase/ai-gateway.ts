@@ -159,6 +159,15 @@ function extractJsonFromContent(content: string): string {
   if (fenceMatch?.[1]) {
     return fenceMatch[1].trim();
   }
+  // Be lenient when the model wraps the JSON in prose (e.g. "Here is the
+  // analysis: { ... }"): slice from the first '{' to the last '}'.
+  if (!trimmed.startsWith("{")) {
+    const first = trimmed.indexOf("{");
+    const last = trimmed.lastIndexOf("}");
+    if (first !== -1 && last > first) {
+      return trimmed.slice(first, last + 1);
+    }
+  }
   return trimmed;
 }
 
