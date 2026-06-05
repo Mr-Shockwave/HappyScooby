@@ -1,0 +1,41 @@
+// Butterbase (sponsor) — PostgreSQL database schema for user consent and mood history.
+// Managed via Prisma ORM. Requires DATABASE_URL in .env.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Telegram user with consent tracking for GDPR-compliant behavioral analysis.
+model User {
+  id            String         @id @default(cuid())
+  telegramId    String         @unique
+  consentGiven  Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  consentLogs   ConsentLog[]
+  moodSnapshots MoodSnapshot[]
+}
+
+/// Audit trail of consent grants and revocations (Butterbase compliance layer).
+model ConsentLog {
+  id        String   @id @default(cuid())
+  userId    String
+  timestamp DateTime @default(now())
+  action    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+/// Point-in-time mood snapshot with contradictions detected by Claude 3.5 Sonnet.
+model MoodSnapshot {
+  id               String   @id @default(cuid())
+  userId           String
+  timestamp        DateTime @default(now())
+  currentMood      String
+  contradictions   String[]
+  encryptedDataRef String
+  user             User     @relation(fields: [userId], references: [id])
+}

@@ -1,0 +1,31 @@
+{
+  "name": "behavioral-archaeologist",
+  "version": "0.1.0",
+  "description": "Behavioral Archaeologist / AI Psychologist agent — Agentic AI SF Hackathon backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch backend/server.ts",
+    "build": "tsc",
+    "start": "node dist/backend/server.js",
+    "typecheck": "tsc --noEmit",
+    "prisma:generate": "prisma generate --schema=butterbase/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema=butterbase/schema.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.9.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "multer": "^2.0.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.2",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.15.21",
+    "prisma": "^6.9.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

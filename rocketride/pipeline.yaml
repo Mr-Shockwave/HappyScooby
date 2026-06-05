@@ -1,0 +1,56 @@
+# RocketRide Visual Workflow — Behavioral Archaeologist Pipeline
+#
+# @sponsor RocketRide
+# This YAML documents the intended 4-stage processing graph.
+# For live RocketRide execution, convert to a .pipe JSON file per:
+#   .rocketride/docs/ROCKETRIDE_PIPELINE_RULES.md
+#
+# Stages: ingestion → vision-analysis → psych-analysis → action-decision
+
+name: behavioral-archaeologist-pipeline
+version: "0.1.0"
+description: >
+  Merges Telegram text and 10-second Android camera frames,
+  runs GPT-4o Vision facial analysis, Claude 3.5 psych evaluation,
+  then decides Telegram responses and XTrace memory updates.
+
+stages:
+  - id: ingestion
+    module: rocketride/nodes/ingestion.ts
+    description: Merge Photon Telegram messages with hardware-bridge camera frames
+    inputs:
+      - source: photon/telegram-bot.ts
+        type: telegram_text
+      - source: hardware-bridge/image-poller.ts
+        type: camera_frame
+        interval_seconds: 10
+
+  - id: vision-analysis
+    module: rocketride/nodes/vision-analysis.ts
+    description: Extract facial expressions via GPT-4o Vision
+    sponsor: Butterbase
+    provider: openai
+    model: gpt-4o
+    env_key: OPENAI_API_KEY
+    input_from: ingestion
+
+  - id: psych-analysis
+    module: rocketride/nodes/psych-analysis.ts
+    description: Detect mood and contradictions via Claude 3.5 Sonnet
+    sponsor: Butterbase
+    provider: anthropic
+    model: claude-3-5-sonnet
+    env_key: ANTHROPIC_API_KEY
+    input_from: vision-analysis
+
+  - id: action-decision
+    module: rocketride/nodes/action-decision.ts
+    description: Send empathetic Telegram reply and update XTrace memory
+    outputs:
+      - target: photon/message-formatter.ts
+        type: telegram_response
+      - target: xtrace/memory-manager.ts
+        type: memory_update
+      - target: butterbase/schema.prisma
+        type: mood_snapshot
+    input_from: psych-analysis
