@@ -18,7 +18,7 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "multer": "^2.0.1",
-    "spectrum-ts": "^1.7.2"
+    "spectrum-ts": "^1.18.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.18",

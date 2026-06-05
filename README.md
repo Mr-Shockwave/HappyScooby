@@ -26,7 +26,7 @@ hardware-bridge/   Android phone image ingestion (10s interval frames)
 
 ```bash
 cp .env.example .env
-# Edit .env with your sponsor API keys
+# Edit .env with your sponsor API keys (Butterbase: BUTTERBASE_API_KEY + BUTTERBASE_PROJECT_ID)
 
 npm install
 npm run prisma:generate
@@ -34,6 +34,49 @@ npm run dev
 ```
 
 Server starts at `http://localhost:3000` by default.
+
+## Telegram bot (local dev)
+
+Telegram must reach your machine via HTTPS. In one terminal, expose port 3000:
+
+```bash
+npx cloudflared tunnel --url http://127.0.0.1:3000
+```
+
+Copy the `https://….trycloudflare.com` URL into `.env` as `SERVER_PUBLIC_URL`, then run `npm run dev`. On startup you should see:
+
+```text
+Photon Telegram webhook registered: https://….trycloudflare.com/photon/telegram/webhook
+```
+
+Keep **both** the tunnel and `npm run dev` running while testing. The tunnel URL changes each time you restart cloudflared — update `.env` and restart the server when that happens.
+
+Alternative: [ngrok](https://ngrok.com) (`ngrok http 3000`) after `ngrok config add-authtoken …`.
+
+## Butterbase (happyscooby)
+
+| Resource | URL / ID |
+|----------|----------|
+| Frontend | [happyscooby.butterbase.dev](https://happyscooby.butterbase.dev) |
+| App ID | `app_bc9eumvexyn3` |
+| API base | `https://api.butterbase.ai/v1/app_bc9eumvexyn3` |
+
+The backend connects to Butterbase automatically via `BUTTERBASE_API_KEY` and `BUTTERBASE_PROJECT_ID`. When `DATABASE_URL` is still the localhost placeholder, data access uses the Butterbase REST Data API (`butterbase/data-api.ts`). Paste a real Postgres URL from the Butterbase dashboard to use direct Prisma instead.
+
+Schema is defined in [`butterbase/happyscoopy.schema.json`](butterbase/happyscoopy.schema.json) (applied on the remote app). Prisma mappings live in [`butterbase/schema.prisma`](butterbase/schema.prisma).
+
+Verify the connection:
+
+```bash
+npx tsx scripts/verify-butterbase.ts
+```
+
+Redeploy the static landing page:
+
+```bash
+cd frontend && tar -a -c -f ../frontend.zip index.html
+# Upload via Butterbase MCP create_frontend_deployment + manage_frontend start_deployment
+```
 
 ## Scripts
 

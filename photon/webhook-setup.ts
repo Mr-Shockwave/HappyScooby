@@ -2,8 +2,9 @@
  * Photon Webhook Setup — Telegram webhook registration on server startup.
  *
  * @sponsor Photon
- * Registers the Photon Telegram webhook endpoint with the Telegram Bot API
- * via setWebhook. Call once when the Express server starts.
+ * Registers the Telegram Bot API webhook pointing at this server's Express endpoint.
+ * When PHOTON_PROJECT_ID + PHOTON_PROJECT_SECRET are set, outbound delivery is routed
+ * through spectrum-ts; inbound still uses the Telegram webhook at /photon/telegram/webhook.
  */
 
 const TELEGRAM_API_BASE = "https://api.telegram.org";

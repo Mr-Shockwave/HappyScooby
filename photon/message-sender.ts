@@ -1,9 +1,7 @@
 /**
- * Photon Message Sender — native Telegram delivery layer.
+ * Photon Message Sender — direct Telegram Bot API fallback.
  *
- * @sponsor Photon
- * Maps to the Photon framework's "native platform adaptation" feature:
- * delivers empathetic plain-text responses via the Telegram Bot API.
+ * Used when Photon Spectrum credentials are not configured.
  */
 
 const TELEGRAM_API_BASE = "https://api.telegram.org";
@@ -37,7 +35,6 @@ function sleep(ms: number): Promise<void> {
 
 /**
  * Sends a plain-text message to a Telegram chat via the Telegram Bot API.
- * Photon framework native Telegram delivery with retry logic (max 3 attempts).
  */
 export async function sendTelegramMessage(
   chatId: number,
@@ -61,10 +58,10 @@ export async function sendTelegramMessage(
 
       const body = (await response.json()) as TelegramSendMessageResponse;
 
-      if (body.ok) {
+      if (body.ok && body.result?.message_id !== undefined) {
         return {
           success: true,
-          messageId: body.result?.message_id,
+          messageId: body.result.message_id,
           attempts: attempt,
         };
       }

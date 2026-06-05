@@ -1,0 +1,44 @@
+{
+  "tables": {
+    "user": {
+      "columns": {
+        "id": { "type": "text", "primaryKey": true },
+        "telegram_id": { "type": "text", "nullable": false, "unique": true },
+        "consent_given": { "type": "boolean", "nullable": false, "default": "false" },
+        "created_at": { "type": "timestamptz", "nullable": false, "default": "now()" }
+      }
+    },
+    "consent_log": {
+      "columns": {
+        "id": { "type": "text", "primaryKey": true },
+        "user_id": {
+          "type": "text",
+          "nullable": false,
+          "references": { "table": "user", "column": "id", "onDelete": "CASCADE" }
+        },
+        "timestamp": { "type": "timestamptz", "nullable": false, "default": "now()" },
+        "action": { "type": "text", "nullable": false }
+      },
+      "indexes": {
+        "consent_log_user_id_idx": { "columns": ["user_id"] }
+      }
+    },
+    "mood_snapshot": {
+      "columns": {
+        "id": { "type": "text", "primaryKey": true },
+        "user_id": {
+          "type": "text",
+          "nullable": false,
+          "references": { "table": "user", "column": "id", "onDelete": "CASCADE" }
+        },
+        "timestamp": { "type": "timestamptz", "nullable": false, "default": "now()" },
+        "current_mood": { "type": "text", "nullable": false },
+        "contradictions": { "type": "text[]", "nullable": false },
+        "encrypted_data_ref": { "type": "text", "nullable": false }
+      },
+      "indexes": {
+        "mood_snapshot_user_id_idx": { "columns": ["user_id"] }
+      }
+    }
+  }
+}

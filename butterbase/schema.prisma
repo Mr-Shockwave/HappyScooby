@@ -1,5 +1,6 @@
 // Butterbase (sponsor) — PostgreSQL database schema for user consent and mood history.
-// Managed via Prisma ORM. Requires DATABASE_URL in .env.
+// Table/column names use snake_case on Butterbase; Prisma @map keeps camelCase in app code.
+// Requires DATABASE_URL in .env (from Butterbase dashboard → Apps → happyscooby → Overview).
 
 generator client {
   provider = "prisma-client-js"
@@ -13,34 +14,38 @@ datasource db {
 /// Telegram user with consent tracking for GDPR-compliant behavioral analysis.
 model User {
   id            String         @id @default(cuid())
-  telegramId    String         @unique
-  consentGiven  Boolean        @default(false)
-  createdAt     DateTime       @default(now())
+  telegramId    String         @unique @map("telegram_id")
+  consentGiven  Boolean        @default(false) @map("consent_given")
+  createdAt     DateTime       @default(now()) @map("created_at")
   consentLogs   ConsentLog[]
   moodSnapshots MoodSnapshot[]
+
+  @@map("user")
 }
 
 /// Audit trail of consent grants and revocations (Butterbase compliance layer).
 /// action values: "GRANTED", "REVOKED"
 model ConsentLog {
   id        String   @id @default(cuid())
-  userId    String
+  userId    String   @map("user_id")
   timestamp DateTime @default(now())
   action    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@map("consent_log")
 }
 
 /// Point-in-time mood snapshot with contradictions detected by Claude 3.5 Sonnet.
 model MoodSnapshot {
   id               String   @id @default(cuid())
-  userId           String
+  userId           String   @map("user_id")
   timestamp        DateTime @default(now())
-  currentMood      String
+  currentMood      String   @map("current_mood")
   contradictions   String[]
-  encryptedDataRef String
+  encryptedDataRef String   @map("encrypted_data_ref")
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@map("mood_snapshot")
 }
