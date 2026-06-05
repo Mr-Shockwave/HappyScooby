@@ -13,5 +13,5 @@ import { telegramRouter } from "../../photon/telegram-bot.js";
 /** Registers all API route groups on the Express application. */
 export function registerRoutes(app: Express): void {
   app.use("/api/hardware", imagePollerRouter);
-  app.use("/api/telegram", telegramRouter);
+  app.use("/photon/telegram", telegramRouter);
 }

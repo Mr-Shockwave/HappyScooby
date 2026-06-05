@@ -203,3 +203,19 @@ export async function updateXTraceMemory(
     updatedAt: profile.lastUpdatedAt,
   };
 }
+
+/**
+ * DELETE /v1/users/{userId}/memory
+ * Permanently wipes the user's XTrace memory profile (MVP in-memory store).
+ * Used by Photon /delete privacy command.
+ */
+export async function deleteXTraceMemory(userId: string): Promise<void> {
+  const { apiKey, baseUrl } = getXTraceConfig();
+  const url = `${baseUrl}/v1/users/${userId}/memory`;
+
+  // MVP: mock HTTP — production swaps for real DELETE request
+  void url;
+  void apiKey;
+
+  userProfiles.delete(userId);
+}

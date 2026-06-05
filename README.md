@@ -52,7 +52,7 @@ Server starts at `http://localhost:3000` by default.
 |--------|------|-------------|
 | `GET` | `/health` | Health check with sponsor module list |
 | `POST` | `/api/hardware/image` | Receive base64 or multipart image from Android phone |
-| `POST` | `/api/telegram/webhook` | Photon Telegram webhook (stub) |
+| `POST` | `/photon/telegram/webhook` | Photon Telegram webhook (user's only interface) |
 
 ## Test Image Ingestion
 
