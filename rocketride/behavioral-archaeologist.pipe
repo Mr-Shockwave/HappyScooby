@@ -1,0 +1,99 @@
+{
+	"components": [
+		{
+			"id": "webhook_1",
+			"provider": "webhook",
+			"config": {
+				"hideForm": true,
+				"mode": "Source",
+				"parameters": {},
+				"type": "webhook"
+			},
+			"ui": {
+				"position": { "x": 0, "y": 220 },
+				"measured": { "width": 160, "height": 72 },
+				"data": { "class": "source", "label": "ingestion" }
+			}
+		},
+		{
+			"id": "image_vision_openai_1",
+			"provider": "image_vision_openai",
+			"config": {
+				"profile": "openai-4o",
+				"openai-4o": {
+					"apikey": "${OPENAI_API_KEY}",
+					"systemPrompt": "You are a facial expression analyst for the Behavioral Archaeologist AI system. Detect these specific facial markers: Happiness (Duchenne smile with eye crinkling), Sadness (dropped lip corners), Fear (widened eyes), Anger (clenched jaw), Surprise, Disgust. Respond with JSON listing detected emotions and confidence scores (0-1).",
+					"prompt": "Analyze facial expressions in this camera frame from the robot-dog hardware bridge. Return structured JSON with emotions, confidence scores, and observed markers."
+				},
+				"parameters": {}
+			},
+			"input": [
+				{ "lane": "image", "from": "webhook_1" }
+			],
+			"ui": {
+				"position": { "x": 240, "y": 80 },
+				"measured": { "width": 180, "height": 88 },
+				"data": { "class": "image", "label": "vision_analysis" }
+			}
+		},
+		{
+			"id": "prompt_1",
+			"provider": "prompt",
+			"config": {
+				"instructions": [
+					"You are a behavioral psychologist AI for the Behavioral Archaeologist project.",
+					"Synthesize the visual expression analysis, the user's Telegram text message, and any historical behavioral context.",
+					"Detect mood contradictions between what the user says and what their expressions suggest.",
+					"Return strict JSON only with these fields: currentMood (string), contradictions (string array), recommendedAction (string), photonMessageDraft (string — empathetic plain-text for Telegram), xtracePayload (object with facts, contradictions, emotionalPatterns arrays for long-term memory)."
+				]
+			},
+			"input": [
+				{ "lane": "text", "from": "image_vision_openai_1" },
+				{ "lane": "text", "from": "webhook_1" }
+			],
+			"ui": {
+				"position": { "x": 500, "y": 220 },
+				"measured": { "width": 160, "height": 72 },
+				"data": { "class": "text", "label": "psych_analysis_prep" }
+			}
+		},
+		{
+			"id": "llm_anthropic_1",
+			"provider": "llm_anthropic",
+			"config": {
+				"profile": "claude-sonnet-4-6",
+				"claude-sonnet-4-6": {
+					"apikey": "${ANTHROPIC_API_KEY}"
+				},
+				"parameters": {}
+			},
+			"input": [
+				{ "lane": "questions", "from": "prompt_1" }
+			],
+			"ui": {
+				"position": { "x": 760, "y": 220 },
+				"measured": { "width": 170, "height": 88 },
+				"data": { "class": "llm", "label": "psych_analysis" }
+			}
+		},
+		{
+			"id": "response_answers_1",
+			"provider": "response_answers",
+			"config": {
+				"laneName": "answers"
+			},
+			"input": [
+				{ "lane": "answers", "from": "llm_anthropic_1" }
+			],
+			"ui": {
+				"position": { "x": 1020, "y": 220 },
+				"measured": { "width": 160, "height": 72 },
+				"data": { "class": "infrastructure", "label": "action_decision" }
+			}
+		}
+	],
+	"source": "webhook_1",
+	"project_id": "f7a2b8c1-3d4e-5f6a-9b0c-1d2e3f4a5b6c",
+	"viewport": { "x": 0, "y": 0, "zoom": 1 },
+	"version": 1
+}

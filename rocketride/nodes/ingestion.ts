@@ -1,34 +1,42 @@
-import type { AggregatedMoodInput } from "../../backend/services/mood-aggregator.js";
-import type { HardwareImagePayload } from "../../hardware-bridge/image-poller.js";
-import type { PipelineNode } from "./types.js";
+import {
+  createInitialState,
+  type IngestionInput,
+  type PipelineState,
+} from "../types.js";
 
 /**
- * RocketRide Ingestion Node — merges multi-source behavioral signals.
+ * RocketRide Ingestion Node — normalizes multimodal raw inputs into PipelineState.
  *
  * @sponsor RocketRide
- * @connects photon/telegram-bot.ts (Telegram text input)
- * @connects hardware-bridge/image-poller.ts (10s Android camera frames)
+ * RocketRide pipeline orchestration entry point: merges hardware image polling
+ * and Photon Telegram webhook text into a unified state object.
+ *
+ * @connects hardware-bridge/image-poller.ts (imageBase64 from 10s camera frames)
+ * @connects photon/telegram-bot.ts (telegramText from webhook)
  * @connects rocketride/nodes/vision-analysis.ts (downstream stage)
  */
 
-/** Raw inputs collected before pipeline merge. */
-export interface IngestionInput {
-  userId: string;
-  telegramText?: string;
-  cameraFrame?: HardwareImagePayload;
+/**
+ * Accepts raw multimodal inputs and normalizes them into PipelineState.
+ * At least one of imageBase64 or telegramText should be provided.
+ */
+export async function runIngestion(input: IngestionInput): Promise<PipelineState> {
+  const state = createInitialState(input.userId, input.triggerType);
+
+  if (input.imageBase64) {
+    state.rawImage = input.imageBase64;
+  }
+
+  if (input.telegramText) {
+    state.rawText = input.telegramText;
+  }
+
+  if (!state.rawImage && !state.rawText) {
+    throw new Error(
+      "RocketRide ingestion: at least one of imageBase64 or telegramText is required",
+    );
+  }
+
+  state.completedStages.push("ingestion");
+  return state;
 }
-
-/** Merged payload passed to vision-analysis node. */
-export interface IngestionOutput {
-  aggregated: AggregatedMoodInput;
-}
-
-export const ingestionNode: PipelineNode<IngestionInput, IngestionOutput> = {
-  id: "ingestion",
-  description: "Merge Photon Telegram text with hardware-bridge camera frames",
-
-  async execute(input: IngestionInput): Promise<IngestionOutput> {
-    void input;
-    throw new Error("Not implemented: ingestionNode.execute");
-  },
-};

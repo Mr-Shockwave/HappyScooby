@@ -68,6 +68,12 @@ curl -X POST http://localhost:3000/api/hardware/image \
   -F "deviceId=android-01"
 ```
 
-## RocketRide Pipeline Note
+## RocketRide Pipeline
 
-`rocketride/pipeline.yaml` documents the intended 4-stage workflow. When wiring the live RocketRide engine, convert to a `.pipe` JSON file per `.rocketride/docs/ROCKETRIDE_PIPELINE_RULES.md`.
+**Visual editor:** Open [`rocketride/behavioral-archaeologist.pipe`](rocketride/behavioral-archaeologist.pipe) in VS Code with the RocketRide extension to view and edit the workflow graph.
+
+Pipeline DAG: `webhook (ingestion)` → `image_vision_openai (vision)` → `prompt + llm_anthropic (psych)` → `response_answers (action)`
+
+- Hardware images and Telegram text are forwarded from Express into the `webhook_1` source node.
+- [`rocketride/pipeline.yaml`](rocketride/pipeline.yaml) maps `.pipe` components to the TypeScript orchestrator modules.
+- [`rocketride/orchestrator.ts`](rocketride/orchestrator.ts) runs the same 4-stage flow in code when not using the RocketRide cloud engine.

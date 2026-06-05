@@ -1,4 +1,4 @@
-import type { PsychAnalysisResult } from "../../butterbase/ai-gateway.js";
+import type { PsychologyAnalysisResult } from "../../butterbase/ai-gateway.js";
 import type { HardwareImagePayload } from "../../hardware-bridge/image-poller.js";
 
 /**
@@ -29,7 +29,7 @@ export interface AggregatedMoodInput {
 /** Aggregated mood output ready for XTrace storage and Photon response. */
 export interface AggregatedMoodOutput {
   input: AggregatedMoodInput;
-  analysis?: PsychAnalysisResult;
+  analysis?: PsychologyAnalysisResult;
 }
 
 /**

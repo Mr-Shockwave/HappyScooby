@@ -1,56 +1,59 @@
-# RocketRide Visual Workflow — Behavioral Archaeologist Pipeline
+# Behavioral Archaeologist — RocketRide Pipeline (reference)
 #
-# @sponsor RocketRide
-# This YAML documents the intended 4-stage processing graph.
-# For live RocketRide execution, convert to a .pipe JSON file per:
-#   .rocketride/docs/ROCKETRIDE_PIPELINE_RULES.md
+# CANONICAL VISUAL WORKFLOW: rocketride/behavioral-archaeologist.pipe
+# Open that file in VS Code with the RocketRide extension to edit the graph visually.
 #
-# Stages: ingestion → vision-analysis → psych-analysis → action-decision
+# This YAML maps the .pipe components to the TypeScript orchestrator for documentation.
+# DAG: ingestion → vision_analysis → psych_analysis → action_decision
 
 name: behavioral-archaeologist-pipeline
-version: "0.1.0"
-description: >
-  Merges Telegram text and 10-second Android camera frames,
-  runs GPT-4o Vision facial analysis, Claude 3.5 psych evaluation,
-  then decides Telegram responses and XTrace memory updates.
+version: "0.3.0"
+canonical_pipe: rocketride/behavioral-archaeologist.pipe
 
-stages:
-  - id: ingestion
+metadata:
+  sponsor: RocketRide
+  orchestrator: rocketride/orchestrator.ts
+  state_type: rocketride/types.ts
+  triggers:
+    - id: hardware_image_poll
+      source: hardware-bridge/image-poller.ts
+      forwards_to: webhook_1
+      type: image
+      interval_seconds: 10
+    - id: photon_telegram_webhook
+      source: photon/telegram-bot.ts
+      forwards_to: webhook_1
+      type: text
+
+# Maps .pipe component IDs to TypeScript modules
+component_map:
+  webhook_1:
+    stage: ingestion
     module: rocketride/nodes/ingestion.ts
-    description: Merge Photon Telegram messages with hardware-bridge camera frames
-    inputs:
-      - source: photon/telegram-bot.ts
-        type: telegram_text
-      - source: hardware-bridge/image-poller.ts
-        type: camera_frame
-        interval_seconds: 10
-
-  - id: vision-analysis
+  image_vision_openai_1:
+    stage: vision_analysis
     module: rocketride/nodes/vision-analysis.ts
-    description: Extract facial expressions via GPT-4o Vision
-    sponsor: Butterbase
-    provider: openai
-    model: gpt-4o
-    env_key: OPENAI_API_KEY
-    input_from: ingestion
-
-  - id: psych-analysis
+    butterbase: analyzeVisuals
+  prompt_1:
+    stage: psych_analysis_prep
     module: rocketride/nodes/psych-analysis.ts
-    description: Detect mood and contradictions via Claude 3.5 Sonnet
-    sponsor: Butterbase
-    provider: anthropic
-    model: claude-3-5-sonnet
-    env_key: ANTHROPIC_API_KEY
-    input_from: vision-analysis
-
-  - id: action-decision
+  llm_anthropic_1:
+    stage: psych_analysis
+    module: rocketride/nodes/psych-analysis.ts
+    butterbase: analyzePsychology
+  response_answers_1:
+    stage: action_decision
     module: rocketride/nodes/action-decision.ts
-    description: Send empathetic Telegram reply and update XTrace memory
-    outputs:
-      - target: photon/message-formatter.ts
-        type: telegram_response
-      - target: xtrace/memory-manager.ts
-        type: memory_update
-      - target: butterbase/schema.prisma
-        type: mood_snapshot
-    input_from: psych-analysis
+
+dag:
+  edges:
+    - from: webhook_1
+      to: image_vision_openai_1
+    - from: image_vision_openai_1
+      to: prompt_1
+    - from: webhook_1
+      to: prompt_1
+    - from: prompt_1
+      to: llm_anthropic_1
+    - from: llm_anthropic_1
+      to: response_answers_1

@@ -1,4 +1,4 @@
-import type { PsychAnalysisResult } from "../butterbase/ai-gateway.js";
+import type { PsychologyAnalysisResult } from "../butterbase/ai-gateway.js";
 
 /**
  * Photon Message Formatter — produces empathetic plain-text Telegram responses.
@@ -19,7 +19,7 @@ export interface MessageFormatOptions {
  * Ensures bug-free, non-markdown responses suitable for Telegram delivery via Photon.
  */
 export function formatEmpatheticResponse(
-  analysis: PsychAnalysisResult,
+  analysis: PsychologyAnalysisResult,
   options?: MessageFormatOptions,
 ): string {
   void analysis;
