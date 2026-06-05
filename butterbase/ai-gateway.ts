@@ -6,12 +6,12 @@
  * POST /v1/{app_id}/chat/completions using BUTTERBASE_API_KEY and BUTTERBASE_PROJECT_ID.
  *
  * @connects rocketride/nodes/vision-analysis.ts → analyzeVisuals (GPT-4o Vision)
- * @connects rocketride/nodes/psych-analysis.ts → analyzePsychology (Claude 3.5 Sonnet)
+ * @connects rocketride/nodes/psych-analysis.ts → analyzePsychology (Claude Sonnet 4.6)
  */
 
 const BUTTERBASE_DEFAULT_URL = "https://api.butterbase.ai";
 const VISION_MODEL = "openai/gpt-4o";
-const PSYCH_MODEL = "anthropic/claude-3.5-sonnet";
+const PSYCH_MODEL = "anthropic/claude-sonnet-4.6";
 
 const EMOTION_VALUES = [
   "happiness",
@@ -38,7 +38,7 @@ export interface VisualAnalysisResult {
   rawAnalysis: string;
 }
 
-/** Structured output from Claude 3.5 Sonnet psychological synthesis. */
+/** Structured output from Claude Sonnet 4.6 psychological synthesis. */
 export interface PsychologyAnalysisResult {
   currentMood: string;
   contradictions: string[];
@@ -256,9 +256,13 @@ async function callButterbaseChat(
   const body = (await response.json()) as ButterbaseChatResponse;
 
   if (!response.ok) {
-    const message =
-      body.error?.message ?? `Butterbase AI Gateway request failed (${response.status})`;
-    throw new Error(`Butterbase AI Gateway: ${message}`);
+    const code = body.error?.code;
+    const type = body.error?.type;
+    const detail = body.error?.message ?? `HTTP ${response.status}`;
+    const suffix = code ? ` [${code}]` : type ? ` (${type})` : "";
+    throw new Error(
+      `Butterbase AI Gateway: ${detail}${suffix} (model=${model}, status=${response.status})`,
+    );
   }
 
   const content = body.choices?.[0]?.message?.content;
@@ -301,7 +305,7 @@ export async function analyzeVisuals(
 
 /**
  * Synthesizes visual data, user text, and historical context via Butterbase AI Gateway
- * using Claude 3.5 Sonnet. Returns mood, contradictions, and a Photon message draft.
+ * using Claude Sonnet 4.6. Returns mood, contradictions, and a Photon message draft.
  */
 export async function analyzePsychology(
   visualData: VisualAnalysisResult,

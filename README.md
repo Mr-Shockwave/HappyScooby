@@ -69,6 +69,7 @@ Verify the connection:
 
 ```bash
 npx tsx scripts/verify-butterbase.ts
+npx tsx scripts/verify-ai-gateway.ts
 ```
 
 Redeploy the static landing page:
